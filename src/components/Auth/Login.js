@@ -5,12 +5,13 @@ import { useFormValidation } from "../../hooks/useFormValidation"; // Adjust pat
 import InputField from "./InputField"; // Adjust path based on your project structure
 import { addUser } from "../../Store/Userslice"; // Adjust path based on your project structure
 import { useNavigate } from "react-router-dom";
-
+import { addLoggedUser } from "../../Store/LoggedUser";
 function Login() {
   const navigate = useNavigate();
   const { errors, validateForm } = useFormValidation();
   const dispatch = useDispatch();
   const storedUserData = useSelector((state) => state.userData.items);
+  console.log(storedUserData);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -39,7 +40,8 @@ function Login() {
       );
 
       if (user) {
-        console.log();
+        console.log("user");
+        dispatch(addLoggedUser(user));
         // Redirect user or perform actions on successful login
         navigate("/home");
         console.log("Logged in successfully:", user);
