@@ -1,17 +1,26 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useFormValidation } from "../../hooks/useFormValidation"; // Adjust path based on your project structure
-import InputField from "./InputField"; // Adjust path based on your project structure
-import { addUser } from "../../Store/Userslice"; // Adjust path based on your project structure
-import { useNavigate } from "react-router-dom";
+import { useFormValidation } from "../../hooks/useFormValidation";
+import InputField from "./InputField";
 import { addLoggedUser } from "../../Store/LoggedUser";
+import { useNavigate } from "react-router-dom";
+import Axiosinstance from "../../axios/axios";
+
 function Login() {
+  const predefinedUserData = {
+    id: "1",
+    name: "user",
+    email: "user@gmail.com",
+    password: "123123",
+    follower: [],
+    following: [],
+  };
+
   const navigate = useNavigate();
   const { errors, validateForm } = useFormValidation();
   const dispatch = useDispatch();
   const storedUserData = useSelector((state) => state.userData.items);
-  console.log(storedUserData);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -31,21 +40,30 @@ function Login() {
       return;
     }
 
-    // Simulate authentication logic
     try {
-      // Check if the entered email and password match any stored user data
       const user = storedUserData.find(
         (user) =>
           user.email === formData.email && user.password === formData.password
       );
 
-      if (user) {
-        console.log("user");
-        dispatch(addLoggedUser(user));
-        // Redirect user or perform actions on successful login
-        navigate("/home");
-        console.log("Logged in successfully:", user);
-        // Example: Redirect user to dashboard
+      const userDetails =
+        predefinedUserData.email === formData.email &&
+        predefinedUserData.password === formData.password;
+
+      if (user || userDetails) {
+        const userId = user ? user.id : predefinedUserData.id;
+
+        Axiosinstance.post("/api/jwt", { userId })
+          .then((res) => {
+            const token = res.data.token;
+            localStorage.setItem("token", token);
+            dispatch(addLoggedUser(user || predefinedUserData));
+            navigate("/home");
+          })
+          .catch((error) => {
+            setError("Failed to login. Please try again.");
+            console.error("Login error:", error);
+          });
       } else {
         setError("Invalid email or password. Please try again.");
       }
@@ -58,6 +76,9 @@ function Login() {
   return (
     <div>
       <section className="bg-gray-50 dark:bg-gray-900">
+        <p className="text-center text-red-600">
+          email:- user@gmail.com <br /> pass:- 123123
+        </p>
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -102,10 +123,7 @@ function Login() {
 
                 {error && <p className="text-red-500">{error}</p>}
 
-                <button
-                  type="submit"
-                  className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                >
+                <button type="submit" className="bg-blue-700 p-2 rounded-lg">
                   Login
                 </button>
 

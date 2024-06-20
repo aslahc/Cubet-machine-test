@@ -3,22 +3,27 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import InputField from "./InputField";
+import { useNavigate } from "react-router-dom";
+
 import { useFormValidation } from "../../hooks/useFormValidation";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../Store/Userslice";
-import { v4 as uuidv4 } from "uuid"; // Import UUIDv4 generator
+import { v4 as uuidv4 } from "uuid";
 import { useTheme } from "../../hooks/ThemeContext";
 
 function Signup() {
+  const navigate = useNavigate();
   const { errors, validateForm } = useFormValidation();
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    id: uuidv4(), // Generate UUIDv4 for user ID
+    id: uuidv4(),
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    follower: [],
+    following: [],
   });
 
   const handleChange = (e) => {
@@ -34,17 +39,14 @@ function Signup() {
 
     dispatch(addUser(formData));
 
-    // Reset form data after saving to Redux store
     setFormData({
-      id: uuidv4(), // Generate new UUIDv4 for next user
+      id: uuidv4(),
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
     });
-
-    console.log("User data saved to Redux:", formData);
-    console.log(formData, "to backend");
+    navigate("/");
   };
 
   return (
@@ -145,14 +147,7 @@ function Signup() {
                   <span className="text-red-500">{errors.confirmPassword}</span>
                 )}
 
-                <button
-                  type="submit"
-                  className={`w-full text-white ${
-                    theme === "dark"
-                      ? "bg-primary-600 hover:bg-primary-700 focus:ring-primary-800"
-                      : "bg-primary-600 hover:bg-primary-700 focus:ring-primary-300"
-                  } focus:outline-none focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center`}
-                >
+                <button type="submit" className="bg-blue-700 p-2 rounded-lg">
                   Create an account
                 </button>
 

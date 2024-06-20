@@ -1,30 +1,36 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const LoggeduserSlice = createSlice({
-  name: "userData",
+const LoggedUserSlice = createSlice({
+  name: "loggedUserData",
   initialState: {
-    items: [], // Assuming you want to store multiple users; adjust as needed
+    items: [],
   },
   reducers: {
     addLoggedUser: (state, action) => {
-      state.items.push(action.payload); // Add user data to the state
+      state.items.push(action.payload);
     },
     updateLoggedUser: (state, action) => {
       const { updatedData } = action.payload;
-
-      // Assuming you have multiple items in state.items and you want to update the first item
-      state.items[0] = {
-        ...state.items[0], // Keep existing properties of the first item
-        ...updatedData, // Overwrite with updatedData
-      };
+      if (state.items.length > 0) {
+        state.items[0] = {
+          ...state.items[0],
+          ...updatedData,
+        };
+      }
     },
     resetLoggedUser: (state) => {
-      state.items = []; // Reset items to empty array
+      state.items = [];
+    },
+    following: (state, action) => {
+      const { userId } = action.payload;
+      if (state.items.length > 0) {
+        state.items[0].following.push(userId);
+      }
     },
   },
 });
 
-export const { addLoggedUser, updateLoggedUser, resetLoggedUser } =
-  LoggeduserSlice.actions;
+export const { addLoggedUser, updateLoggedUser, resetLoggedUser, following } =
+  LoggedUserSlice.actions;
 
-export default LoggeduserSlice.reducer;
+export default LoggedUserSlice.reducer;

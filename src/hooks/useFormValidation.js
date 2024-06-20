@@ -25,7 +25,7 @@ export const useFormValidation = () => {
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0; // Return true if there are no errors
+    return Object.keys(newErrors).length === 0;
   };
 
   return { errors, validateForm };

@@ -3,15 +3,25 @@ import { createSlice } from "@reduxjs/toolkit";
 const userSlice = createSlice({
   name: "userData",
   initialState: {
-    items: [], // Assuming you want to store multiple users; adjust as needed
+    items: [],
   },
   reducers: {
     addUser: (state, action) => {
-      state.items.push(action.payload); // Add user data to the state
+      state.items.push(action.payload);
+    },
+    followUser: (state, action) => {
+      const { userId, id } = action.payload;
+      const userToUpdate = state.items.find((user) => user.id === id);
+      if (userToUpdate) {
+        if (!userToUpdate.followers) {
+          userToUpdate.followers = [];
+        }
+        userToUpdate.followers.push(userId);
+      }
     },
   },
 });
 
-export const { addUser } = userSlice.actions;
+export const { addUser, followUser } = userSlice.actions;
 
 export default userSlice.reducer;

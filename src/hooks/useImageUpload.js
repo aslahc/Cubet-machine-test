@@ -7,13 +7,16 @@ const useImageUpload = (presetKey, cloudName) => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (file && file.type.includes("image")) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImage(reader.result);
         setNewImageSelected(true);
       };
       reader.readAsDataURL(file);
+    } else {
+      // Handle non-image file selection
+      alert("Please select a valid image file.");
     }
   };
 

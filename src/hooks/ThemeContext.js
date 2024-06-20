@@ -10,13 +10,12 @@ export const useTheme = () => useContext(ThemeContext);
 
 // Theme provider component
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("light"); // Default theme is light
+  const [theme, setTheme] = useState("light");
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
-  // Dynamically set the class on the body to apply styles based on theme
   useEffect(() => {
     document.body.className = theme === "dark" ? "dark-mode" : "";
   }, [theme]);

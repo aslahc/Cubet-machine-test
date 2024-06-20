@@ -8,17 +8,17 @@ function EditProfile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const LoggedUserData = useSelector((state) => state.LoggedUser.items[0]);
-
   const [formData, setFormData] = useState({
     username: "",
     bio: "",
   });
   const [defaultProfileImage, setDefaultProfileImage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [bioError, setBioError] = useState(false); // State for bio error
 
   const presetKey = "cloudinaryimg";
   const cloudName = "dy9ofwwjp";
 
-  // Use the custom hook for image upload
   const {
     image: profileImage,
     newImageSelected,
@@ -34,20 +34,33 @@ function EditProfile() {
       });
       setDefaultProfileImage(
         LoggedUserData.profileImage || "path/to/default/profile/image.jpg"
-      ); // Set your default image path here
+      );
     }
   }, [LoggedUserData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    if (name === "bio" && value.length > 15) {
+      // Adjust the limit here (15 characters)
+      setBioError(true); // Set bio error state to true
+    } else {
+      setBioError(false); // Reset bio error state
+      setFormData((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (bioError) {
+      // Prevent form submission if there's a bio error
+      return;
+    }
+
+    setLoading(true);
 
     let updatedProfileImage = profileImage;
 
@@ -56,6 +69,7 @@ function EditProfile() {
       if (uploadedImageUrl) {
         updatedProfileImage = uploadedImageUrl;
       } else {
+        setLoading(false);
         alert("Failed to upload image. Please try again.");
         return;
       }
@@ -81,7 +95,6 @@ function EditProfile() {
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-5">
-            {/* Profile Image */}
             <div className="sm:col-span-2 flex justify-center items-center">
               <div className="relative w-40 h-40 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-800">
                 <img
@@ -124,7 +137,7 @@ function EditProfile() {
                 required
               />
             </div>
-            {/* Bio */}
+
             <div className="w-full">
               <label
                 htmlFor="bio"
@@ -138,35 +151,46 @@ function EditProfile() {
                 value={formData.bio}
                 onChange={handleChange}
                 rows="4"
-                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border ${
+                  bioError ? "border-red-500" : "border-gray-300"
+                } focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`}
                 placeholder="Write your bio here..."
               ></textarea>
+              {bioError && (
+                <p className="text-red-500 text-sm mt-1">
+                  Bio must be 15 characters or less.
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <button
               type="submit"
-              className="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              className={`${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              } bg-blue-700 rounded-lg p-2 text-white flex items-center`}
+              disabled={loading}
             >
-              Update Profile
-            </button>
-            <button
-              type="button"
-              className="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-            >
-              <svg
-                className="w-5 h-5 mr-1 -ml-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
-              Delete
+              {loading && (
+                <svg
+                  aria-hidden="true"
+                  role="status"
+                  className="inline w-4 h-4 me-3 text-white animate-spin"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="#E5E7EB"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              )}
+              {loading ? "Updating..." : "Update Profile"}
             </button>
           </div>
         </form>
